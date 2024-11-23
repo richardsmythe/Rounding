@@ -4,8 +4,8 @@
     private static void Main(string[] args)
     {
         ProportionalAllocation pa = new ProportionalAllocation([2, 1, 1], 10);
-        var share = pa.GetProportionalShares();
-        Console.WriteLine(share);
+        var shares = pa.GetProportionalShares();
+        Console.WriteLine("Proportional Shares: " + string.Join(", ", shares));
     }
 
     public class ProportionalAllocation
