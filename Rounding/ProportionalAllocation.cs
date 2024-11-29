@@ -1,6 +1,5 @@
-﻿
-/// <summary>
-/// Proportional allocation of n based on given weights. discrepency adjustments based on absolute,relative & weighted errors
+﻿/// <summary>
+/// Proportional allocation of n based on given weights. discrepancy adjustments based on absolute, relative & weighted errors
 /// </summary>
 public class ProportionalAllocation
 {
@@ -17,22 +16,24 @@ public class ProportionalAllocation
     public int[] GetProportionalShares()
     {
         if (_weights == null || _weights.Length == 0 || _n == 0) return [0];
-
+        
         double[] idealProportionalShare = new double[_weights.Length];
         int[] roundedShares = new int[_weights.Length];
-
         for (int i = 0; i < _weights.Length; i++)
         {
-            idealProportionalShare[i] = _n * (double)_weights[i] / SumOfWeights;
+            idealProportionalShare[i] = _n * _weights[i] / SumOfWeights;
             roundedShares[i] = (int)Math.Round(idealProportionalShare[i], MidpointRounding.AwayFromZero);
         }
-
+        
         var d = _n - roundedShares.Sum();
-        var dSign = Math.Sign(d);
-        if (d != 0) d = AdjustDependency(idealProportionalShare, roundedShares, d);
+        if (d != 0)
+        {
+            d = AdjustDependency(idealProportionalShare, roundedShares, d);
+        }      
 
         return roundedShares;
     }
+
 
     private int AdjustDependency(double[] idealProportionalShare, int[] roundedShares, int d)
     {
@@ -40,13 +41,12 @@ public class ProportionalAllocation
         {
             double[] absoluteErrors = new double[_weights.Length];
             double[] relativeErrors = new double[_weights.Length];
-
             for (int i = 0; i < _weights.Length; i++)
             {
                 absoluteErrors[i] = idealProportionalShare[i] - roundedShares[i];
                 relativeErrors[i] = absoluteErrors[i] / idealProportionalShare[i];
             }
-
+            
             double[] priorityScores = new double[_weights.Length];
             for (int i = 0; i < _weights.Length; i++)
             {
@@ -56,13 +56,13 @@ public class ProportionalAllocation
             int highestPriorityScoreIndex = Array.IndexOf(priorityScores, priorityScores.Max());
             if (d > 0)
             {
-
                 roundedShares[highestPriorityScoreIndex] += 1;
             }
             if (d < 0)
             {
                 roundedShares[highestPriorityScoreIndex] -= 1;
             }
+
             d = _n - roundedShares.Sum();
         }
 
