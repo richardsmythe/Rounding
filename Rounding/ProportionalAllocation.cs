@@ -11,18 +11,29 @@ public class ProportionalAllocation
     {
         _weights = weights;
         _n = n;
+        if (SumOfWeights >= double.MaxValue) 
+            throw new OverflowException("The total weight is too large.");
+        if (_weights.Length > 0 && _weights.Max() * Math.Abs((double)(_n + 1)) >= double.MaxValue)
+            throw new OverflowException("Weights too large, potential scaling overflow");       
+
     }
 
     public int[] GetProportionalShares()
     {
-        if (_weights == null || _weights.Length == 0 || _n == 0) return [0];
-        
+        if (_weights == null || _weights.Length == 0 || _n == 0) return [0];  
+       
         double[] idealProportionalShare = new double[_weights.Length];
+
         int[] roundedShares = new int[_weights.Length];
         for (int i = 0; i < _weights.Length; i++)
         {
             idealProportionalShare[i] = _n * _weights[i] / SumOfWeights;
-            roundedShares[i] = (int)Math.Round(idealProportionalShare[i], MidpointRounding.AwayFromZero);
+
+            if (idealProportionalShare[i] > int.MaxValue || idealProportionalShare[i] < int.MinValue)
+            {
+                throw new OverflowException("Computed proportional shares exceed allowable range.");
+            }
+            roundedShares[i] = CustomRound(idealProportionalShare[i]);
         }
         
         var d = _n - roundedShares.Sum();
@@ -34,7 +45,8 @@ public class ProportionalAllocation
         return roundedShares;
     }
 
-
+    private int CustomRound(double value) => value < 0 ? (int)(value - 0.5) : (int)(value + 0.5);
+    
     private int AdjustDependency(double[] idealProportionalShare, int[] roundedShares, int d)
     {
         while (d != 0)
