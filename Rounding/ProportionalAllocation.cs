@@ -1,4 +1,6 @@
-﻿/// <summary>
+﻿using System.Diagnostics;
+
+/// <summary>
 /// Proportional allocation of n based on given weights. discrepancy adjustments based on absolute, relative & weighted errors
 /// </summary>
 public class ProportionalAllocation
@@ -40,8 +42,7 @@ public class ProportionalAllocation
         if (d != 0)
         {
             d = AdjustDependency(idealProportionalShare, roundedShares, d);
-        }      
-
+        }
         return roundedShares;
     }
 
@@ -62,7 +63,8 @@ public class ProportionalAllocation
             double[] priorityScores = new double[_weights.Length];
             for (int i = 0; i < _weights.Length; i++)
             {
-                priorityScores[i] = Math.Abs(absoluteErrors[i]) + Math.Abs(relativeErrors[i]);
+                priorityScores[i] = Math.Abs(absoluteErrors[i]) / SumOfWeights + Math.Abs(relativeErrors[i]);
+
             }
 
             int highestPriorityScoreIndex = Array.IndexOf(priorityScores, priorityScores.Max());
@@ -74,6 +76,7 @@ public class ProportionalAllocation
             {
                 roundedShares[highestPriorityScoreIndex] -= 1;
             }
+
 
             d = _n - roundedShares.Sum();
         }
