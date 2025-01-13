@@ -11,12 +11,12 @@ namespace Rounding.Tests
         }
 
         [Fact]
-        public void Test_Negative_Distribution ()
+        public void Test_Negative_Distribution()
         {
             double[] weights = [-500.0, -300.0, -200.0, 0.0];
             int n = -100;
-            var pa = new ProportionalAllocation(weights,n);
-            var s= pa.GetProportionalShares();
+            var pa = new ProportionalAllocation(weights, n);
+            var s = pa.GetProportionalShares();
             Assert.Equal(n, s.Sum());
             Assert.Equal(s, [-50, -30, -20, 0]);
         }
@@ -63,13 +63,32 @@ namespace Rounding.Tests
         public void Test_Discrepancy_Adjustments()
         {
             double[] weights = { 40, 35.5, 100, 55.6, 20 };
-            int n = 98; 
+            int n = 98;
             var pa = new ProportionalAllocation(weights, n);
             var s = pa.GetProportionalShares();
             Assert.Equal(n, s.Sum());
             Assert.Equal([15, 14, 39, 22, 8], s);
         }
 
+        [Fact]
+        public void Test_Large_Input()
+        {
+            double[] weights = { 1000, 2500, 5000, 7500, 12000, 15000, 20000, 30000, 35000, 50000 };
+            int n = 1000000;
+            var pa = new ProportionalAllocation(weights, n);
+            var shares = pa.GetProportionalShares();
+            double sumOfWeights = weights.Sum();
+            int[] expectedShares = new int[weights.Length];
+            for (int i = 0; i < weights.Length; i++)
+            {
+                expectedShares[i] = (int)Math.Round((weights[i] / sumOfWeights) * n);
+            }
+            Assert.Equal(n, shares.Sum());
+            for (int i = 0; i < weights.Length; i++)
+            {
+                Assert.Equal(shares[i], expectedShares[i], 1.0);
+            }
+        }
 
 
     }
